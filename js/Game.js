@@ -8,13 +8,14 @@ class Game {
       gamePanelEl,
       gameBoardEl,
       mineCounterEl,
-      signedMineCounterEl
+      timerEl
    ) {
       this.buttonsPanelEl = buttonsPanelEl;
       this.gamePanelEl = gamePanelEl;
       this.gameBoardEl = gameBoardEl;
       this.mineCounterEl = mineCounterEl;
-      this.signedMineCounterEl = signedMineCounterEl;
+      this.timerEl = timerEl;
+      this.timer = null;
       this.level = {};
       this.mine = {};
       this.cell = {};
@@ -26,7 +27,12 @@ class Game {
       this.level = levels.filter(({ name }) => name === choosenLvlName)[0];
 
       const numberOfCells = this.level.rows * this.level.columns;
-      this.cell = new Cell(numberOfCells, this.gameBoardEl, this.level.columns);
+      this.cell = new Cell(
+         numberOfCells,
+         this.gameBoardEl,
+         this.level.columns,
+         this.mineCounterEl
+      );
       this.mine = new Mine(this.cell.numberOfCells, this.level.mines);
 
       this.mineCounterEl.textContent = this.level.mines;
@@ -35,6 +41,7 @@ class Game {
       this.cell.mineIndexes = this.mine.mineIndexes;
       this.cell.createCells();
       this.cell.pushIndexesNearBomb();
+      this.startTimer();
       this.checkEndOfGame();
    }
 
@@ -57,13 +64,18 @@ class Game {
    }
    end() {
       this.mine.mineIndexes.forEach((mineIndex) => {
+         this.cell.showCell(mineIndex);
          const mineCell = document.getElementById(mineIndex);
-         this.cell.showCell(mineCell);
          mineCell.classList.add("cell--is-mine");
       });
       this.cell.disableAllCells();
+      clearInterval(this.timer);
    }
-
+   startTimer() {
+      this.timer = setInterval(() => {
+         this.timerEl.textContent = Number(this.timerEl.textContent) + 1;
+      }, 1000);
+   }
    start() {
       this.initLevelButtons();
    }

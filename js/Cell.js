@@ -1,5 +1,5 @@
 class Cell {
-   constructor(numberOfCells, gameBoardEl, numberOfColumns) {
+   constructor(numberOfCells, gameBoardEl, numberOfColumns, mineCounterEl) {
       this.numberOfCells = numberOfCells;
       this.allCells = [];
       this.numberOfColumns = numberOfColumns;
@@ -7,6 +7,9 @@ class Cell {
       this.mineIndexes = [];
       this.isEnd = false;
       this.indexesCellsNextToMine = [];
+      this.isClicableIndexes = [];
+      this.mineCounterEl = mineCounterEl;
+      this.numberOfFlagedBomb = 0;
    }
 
    disableAllCells() {
@@ -15,7 +18,8 @@ class Cell {
       });
    }
 
-   showCell(cell) {
+   showCell(index) {
+      const cell = this.allCells[index];
       cell.classList.remove("border--concave");
       cell.classList.add("border--revealed");
    }
@@ -23,7 +27,8 @@ class Cell {
    handleCellClick(e) {
       const clickedCell = e.target;
       const clickedIndex = Number(clickedCell.id);
-      this.showCell(clickedCell);
+      if (this.isClicableIndexes.includes(clickedIndex)) return;
+      this.showCell(clickedIndex);
       if (this.mineIndexes.includes(clickedIndex)) this.isEnd = true;
       this.showNumber(clickedIndex);
    }
@@ -37,6 +42,8 @@ class Cell {
          cell.className = "cell border border--concave";
          cell.id = i;
          cell.addEventListener("click", (e) => this.handleCellClick(e));
+         cell.addEventListener("contextmenu", (e) => this.putFlag(e, cell));
+
          this.allCells.push(cell);
          this.gameBoardEl.appendChild(cell);
       }
@@ -91,13 +98,37 @@ class Cell {
       );
    }
 
+   putFlag(e, cell) {
+      e.preventDefault();
+      const isFlaged = cell.className.includes("cell--is-flag");
+      const isRevealed = cell.className.includes("border--revealed");
+      const numberOfMines = this.mineIndexes.length;
+      if (isFlaged) {
+         this.isClicableIndexes = this.isClicableIndexes.filter(
+            (index) => index !== Number(cell.id)
+         );
+         this.numberOfFlagedBomb--;
+         this.mineCounterEl.textContent =
+            numberOfMines - this.numberOfFlagedBomb;
+      } else {
+         if (this.numberOfFlagedBomb == numberOfMines || isRevealed) return;
+         this.isClicableIndexes.push(Number(cell.id));
+         this.numberOfFlagedBomb++;
+         this.mineCounterEl.textContent =
+            numberOfMines - this.numberOfFlagedBomb;
+      }
+
+      cell.classList.toggle("cell--is-flag");
+   }
+
    showNumber(clickedIndex) {
+      if (this.mineIndexes.includes(clickedIndex)) return;
       const showZeroNeighbors = (zeroIndex) => {
          this.getNeighborIndexes(zeroIndex).forEach((neighIndex) => {
             const isConcave =
                this.allCells[neighIndex].className.includes("border--concave");
             if (isConcave) {
-               this.showCell(this.allCells[neighIndex]);
+               this.showCell(neighIndex);
                this.showNumber(neighIndex);
             }
          });
@@ -106,9 +137,11 @@ class Cell {
       const number = this.indexesCellsNextToMine.filter(
          (index) => index === clickedIndex
       ).length;
-      if (number) this.allCells[clickedIndex].textContent = number;
-      else {
-         this.showCell(this.allCells[clickedIndex]);
+      if (number) {
+         this.allCells[clickedIndex].classList.add(`cell-info-${number}`);
+         this.allCells[clickedIndex].textContent = number;
+      } else {
+         this.showCell(clickedIndex);
          showZeroNeighbors(clickedIndex);
       }
    }
