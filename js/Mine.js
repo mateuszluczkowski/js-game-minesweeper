@@ -13,6 +13,7 @@ class Mine {
 
          this.mineIndexes.push(drawIndex);
       }
+      this.mineIndexes.sort((a, b) => a - b);
    }
 }
 

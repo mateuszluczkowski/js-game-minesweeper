@@ -34,6 +34,8 @@ class Game {
       this.mine.drawMineIndexes();
       this.cell.mineIndexes = this.mine.mineIndexes;
       this.cell.createCells();
+      this.cell.pushIndexesNearBomb();
+      this.checkEndOfGame();
    }
 
    initLevelButtons() {
@@ -46,13 +48,20 @@ class Game {
          this.buttonsPanelEl.appendChild(button);
       });
    }
-
+   checkEndOfGame() {
+      this.cell.allCells.forEach((cell) =>
+         cell.addEventListener("click", () => {
+            if (this.cell.isEnd) this.end();
+         })
+      );
+   }
    end() {
       this.mine.mineIndexes.forEach((mineIndex) => {
          const mineCell = document.getElementById(mineIndex);
-         this.showCell(mineCell);
+         this.cell.showCell(mineCell);
          mineCell.classList.add("cell--is-mine");
       });
+      this.cell.disableAllCells();
    }
 
    start() {
