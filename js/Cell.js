@@ -5,7 +5,9 @@ class Cell {
       this.numberOfColumns = numberOfColumns;
       this.gameBoardEl = gameBoardEl;
       this.mineIndexes = [];
-      this.isEnd = false;
+      this.isLose = false;
+      this.isWin = false;
+      this.numberOfGuessedCells = 0;
       this.indexesCellsNextToMine = [];
       this.isClicableIndexes = [];
       this.mineCounterEl = mineCounterEl;
@@ -19,17 +21,27 @@ class Cell {
    }
 
    showCell(index) {
+      console.log(this.numberOfGuessedCells);
       const cell = this.allCells[index];
       cell.classList.remove("border--concave");
       cell.classList.add("border--revealed");
+      this.numberOfGuessedCells++;
    }
 
    handleCellClick(e) {
       const clickedCell = e.target;
       const clickedIndex = Number(clickedCell.id);
+
       if (this.isClicableIndexes.includes(clickedIndex)) return;
       this.showCell(clickedIndex);
-      if (this.mineIndexes.includes(clickedIndex)) this.isEnd = true;
+
+      this.isLose = this.mineIndexes.includes(clickedIndex);
+
+      this.isWin =
+         this.numberOfGuessedCells ===
+         this.numberOfCells - this.mineIndexes.length;
+      console.log(this.numberOfGuessedCells, this.isWin);
+
       this.showNumber(clickedIndex);
    }
    createCells() {
@@ -83,7 +95,7 @@ class Cell {
       return neighborIndexes;
    }
 
-   pushIndexesNearBomb() {
+   pushIndexesNextToMine() {
       this.mineIndexes.forEach((mineIndex) =>
          this.getNeighborIndexes(mineIndex).forEach((neighbor) =>
             this.indexesCellsNextToMine.push(neighbor)
@@ -141,7 +153,6 @@ class Cell {
          this.allCells[clickedIndex].classList.add(`cell-info-${number}`);
          this.allCells[clickedIndex].textContent = number;
       } else {
-         this.showCell(clickedIndex);
          showZeroNeighbors(clickedIndex);
       }
    }
