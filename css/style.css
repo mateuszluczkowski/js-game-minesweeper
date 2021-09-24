@@ -1,4 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Lato&display=swap");
+@font-face {
+   font-family: DIGITALDREAM;
+   src: url("../assets/DIGITALDREAM.ttf");
+}
 :root {
    --primary-color: #c0c0c0;
    --primary-color--dark: #808080;
@@ -22,11 +26,6 @@
       var(--cell-size) * var(--cells-in-row) + calc(2 * var(--game-padding)) +
          calc(2 * var(--border-width))
    );
-}
-
-@font-face {
-   font-family: DIGITALDREAM;
-   src: url("../assets/DIGITALDREAM.ttf");
 }
 
 *,

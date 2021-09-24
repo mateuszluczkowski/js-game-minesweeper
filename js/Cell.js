@@ -9,30 +9,26 @@ class Cell {
       this.isWin = false;
       this.numberOfGuessedCells = 0;
       this.indexesCellsNextToMine = [];
-      this.isClicableIndexes = [];
+      this.unclickableIndexes = [];
       this.mineCounterEl = mineCounterEl;
       this.numberOfFlagedBomb = 0;
    }
 
    disableAllCells() {
-      this.allCells.forEach((cell) => {
-         cell.style.pointerEvents = "none";
-      });
+      this.allCells.forEach((cell) => (cell.style.pointerEvents = "none"));
    }
 
    showCell(index) {
-      console.log(this.numberOfGuessedCells);
       const cell = this.allCells[index];
       cell.classList.remove("border--concave");
+      cell.classList.remove("cell--is-flag");
       cell.classList.add("border--revealed");
       this.numberOfGuessedCells++;
    }
 
    handleCellClick(e) {
-      const clickedCell = e.target;
-      const clickedIndex = Number(clickedCell.id);
-
-      if (this.isClicableIndexes.includes(clickedIndex)) return;
+      const clickedIndex = Number(e.target.id);
+      if (this.unclickableIndexes.includes(clickedIndex)) return;
       this.showCell(clickedIndex);
 
       this.isLose = this.mineIndexes.includes(clickedIndex);
@@ -40,7 +36,6 @@ class Cell {
       this.isWin =
          this.numberOfGuessedCells ===
          this.numberOfCells - this.mineIndexes.length;
-      console.log(this.numberOfGuessedCells, this.isWin);
 
       this.showNumber(clickedIndex);
    }
@@ -64,6 +59,7 @@ class Cell {
    getNeighborIndexes(index) {
       const neighborIndexes = [];
       let startColumn, endColumn;
+
       if (index % this.numberOfColumns === 0) {
          startColumn = 0;
          endColumn = 1;
@@ -116,7 +112,7 @@ class Cell {
       const isRevealed = cell.className.includes("border--revealed");
       const numberOfMines = this.mineIndexes.length;
       if (isFlaged) {
-         this.isClicableIndexes = this.isClicableIndexes.filter(
+         this.unclickableIndexes = this.unclickableIndexes.filter(
             (index) => index !== Number(cell.id)
          );
          this.numberOfFlagedBomb--;
@@ -124,7 +120,7 @@ class Cell {
             numberOfMines - this.numberOfFlagedBomb;
       } else {
          if (this.numberOfFlagedBomb == numberOfMines || isRevealed) return;
-         this.isClicableIndexes.push(Number(cell.id));
+         this.unclickableIndexes.push(Number(cell.id));
          this.numberOfFlagedBomb++;
          this.mineCounterEl.textContent =
             numberOfMines - this.numberOfFlagedBomb;

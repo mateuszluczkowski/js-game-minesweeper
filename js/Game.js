@@ -19,19 +19,17 @@ class Game {
       this.mineCounterEl = mineCounter;
       this.modalEl = modal;
       this.resetButtonEl = resetButton;
-      this.resultFaceImage = resultFaceImage;
       this.timerEl = timer;
+      this.resultFaceImage = resultFaceImage;
       this.timer = null;
       this.level = {};
       this.mine = {};
       this.cell = {};
    }
 
-   setAllProperty(e) {
+   setAllLevelProperty(e) {
       const choosenLvlName = e.target.id;
-
       this.level = levels.filter(({ name }) => name === choosenLvlName)[0];
-
       const numberOfCells = this.level.rows * this.level.columns;
       this.cell = new Cell(
          numberOfCells,
@@ -40,7 +38,6 @@ class Game {
          this.mineCounterEl
       );
       this.mine = new Mine(this.cell.numberOfCells, this.level.mines);
-
       this.mineCounterEl.textContent = this.level.mines;
       this.gamePanelEl.style.display = "none";
       this.mine.drawMineIndexes();
@@ -57,37 +54,34 @@ class Game {
          button.id = name;
          button.classList.add("button");
          button.innerText = name;
-         button.addEventListener("click", (e) => this.setAllProperty(e));
+         button.addEventListener("click", (e) => this.setAllLevelProperty(e));
          this.buttonsPanelEl.appendChild(button);
       });
    }
    checkResult() {
       this.cell.allCells.forEach((cell) =>
          cell.addEventListener("click", () => {
-            if (this.cell.isLose) this.end("lose");
+            if (this.cell.isLose) this.end(true);
             if (this.cell.isWin) this.end();
          })
       );
    }
-   displayModal(result) {
+   displayModal(isLose) {
       const modalText = document.querySelector(".modal__text");
       const modalSubtext = document.querySelector(".modal__subtext");
       const modalButton = document.querySelector(".modal__button");
       const convertTime = (time) => {
-         const seconds = time % 60 < 10 ? `0${time % 60}` : time % 60;
-         const minutes =
-            Math.floor(time / 60) < 10
-               ? `0${Math.floor(time / 60)}`
-               : Math.floor(time / 60);
-         const hours =
-            Math.floor(time / (60 * 60)) < 10
-               ? `0${Math.floor(time / 60)}`
-               : Math.floor(time / 60);
-         return `${hours === "00" ? "" : hours + ":"}${
-            minutes + ":"
-         }${seconds}`;
+         const shouldAddZero = (timeToCheck) =>
+            timeToCheck < 10 ? "0" + timeToCheck : String(timeToCheck);
+
+         const seconds = shouldAddZero(time % 60);
+         const minutes = shouldAddZero(Math.floor(time / 60) % 60);
+         const hours = shouldAddZero(Math.floor(time / (60 * 60)));
+
+         return `${hours === "00" ? "" : hours + ":"}${minutes}:${seconds}`;
       };
-      if (result === "lose") {
+
+      if (isLose) {
          modalText.textContent = "Bad luck :( You Lose!";
          modalSubtext.style.display = "none";
       } else {
@@ -95,9 +89,7 @@ class Game {
          modalSubtext.style.display = "block";
       }
 
-      modalButton.addEventListener("click", () => {
-         this.reset();
-      });
+      modalButton.addEventListener("click", () => this.reset());
       modalSubtext.textContent = `your time: ${convertTime(
          Number(this.timerEl.textContent)
       )}`;
@@ -120,11 +112,11 @@ class Game {
       this.mineCounterEl.textContent = 0;
    }
 
-   end(result) {
+   end(isLose) {
       this.cell.disableAllCells();
       clearInterval(this.timer);
-      this.displayModal(result);
-      if (result === "lose") {
+      this.displayModal(isLose);
+      if (isLose) {
          this.resultFaceImage.setAttribute(
             "href",
             "./assets/sprite.svg#negative"
