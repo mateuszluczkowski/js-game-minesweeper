@@ -11,16 +11,24 @@ class Game {
       timer,
       modal,
       resetButton,
-      resultFaceImage
+      resultFaceImage,
+      modalText,
+      modalSubtext,
+      modalButton
    ) {
-      this.buttonsPanelEl = buttonsPanel;
-      this.gamePanelEl = gamePanel;
-      this.gameBoardEl = gameBoard;
-      this.mineCounterEl = mineCounter;
-      this.modalEl = modal;
-      this.resetButtonEl = resetButton;
-      this.timerEl = timer;
-      this.resultFaceImage = resultFaceImage;
+      this.elements = {
+         buttonsPanel,
+         gamePanel,
+         gameBoard,
+         mineCounter,
+         modal,
+         resetButton,
+         timer,
+         resultFaceImage,
+         modalText,
+         modalSubtext,
+         modalButton,
+      };
       this.timer = null;
       this.level = {};
       this.mine = {};
@@ -28,24 +36,24 @@ class Game {
    }
 
    setAllLevelProperty(e) {
-      const choosenLvlName = e.target.id;
-      this.level = levels.filter(({ name }) => name === choosenLvlName)[0];
+      const levelName = e.target.id;
+      this.level = levels.filter(({ name }) => name === levelName)[0];
       const numberOfCells = this.level.rows * this.level.columns;
       this.cell = new Cell(
+         this.end.bind(this),
          numberOfCells,
-         this.gameBoardEl,
+         this.elements.gameBoard,
          this.level.columns,
-         this.mineCounterEl
+         this.elements.mineCounter
       );
       this.mine = new Mine(this.cell.numberOfCells, this.level.mines);
-      this.mineCounterEl.textContent = this.level.mines;
-      this.gamePanelEl.style.display = "none";
+      this.elements.mineCounter.textContent = this.level.mines;
       this.mine.drawMineIndexes();
       this.cell.mineIndexes = this.mine.mineIndexes;
       this.cell.createCells();
       this.cell.pushIndexesNextToMine();
+      this.elements.gamePanel.style.display = "none";
       this.startTimer();
-      this.checkResult();
    }
 
    initLevelButtons() {
@@ -55,21 +63,11 @@ class Game {
          button.classList.add("button");
          button.innerText = name;
          button.addEventListener("click", (e) => this.setAllLevelProperty(e));
-         this.buttonsPanelEl.appendChild(button);
+         this.elements.buttonsPanel.appendChild(button);
       });
    }
-   checkResult() {
-      this.cell.allCells.forEach((cell) =>
-         cell.addEventListener("click", () => {
-            if (this.cell.isLose) this.end(true);
-            if (this.cell.isWin) this.end();
-         })
-      );
-   }
+
    displayModal(isLose) {
-      const modalText = document.querySelector(".modal__text");
-      const modalSubtext = document.querySelector(".modal__subtext");
-      const modalButton = document.querySelector(".modal__button");
       const convertTime = (time) => {
          const shouldAddZero = (timeToCheck) =>
             timeToCheck < 10 ? "0" + timeToCheck : String(timeToCheck);
@@ -82,34 +80,38 @@ class Game {
       };
 
       if (isLose) {
-         modalText.textContent = "Bad luck :( You Lose!";
-         modalSubtext.style.display = "none";
+         this.elements.modalText.textContent = "Bad luck :( You Lose!";
+         this.elements.modalSubtext.style.display = "none";
       } else {
-         modalText.textContent = "Congratulations! You won!";
-         modalSubtext.style.display = "block";
+         this.elements.modalText.textContent = "Congratulations! You won!";
+         this.elements.modalSubtext.style.display = "block";
       }
 
-      modalButton.addEventListener("click", () => this.reset());
-      modalSubtext.textContent = `your time: ${convertTime(
-         Number(this.timerEl.textContent)
+      this.elements.modalButton.addEventListener("click", () => this.reset());
+      this.elements.modalSubtext.textContent = `your time: ${convertTime(
+         Number(this.elements.timer.textContent)
       )}`;
-      this.modalEl.classList.remove("hide");
+      this.elements.modal.classList.remove("hide");
    }
    startTimer() {
       this.timer = setInterval(() => {
-         this.timerEl.textContent = Number(this.timerEl.textContent) + 1;
+         this.elements.timer.textContent =
+            Number(this.elements.timer.textContent) + 1;
       }, 1000);
    }
 
    reset() {
       clearInterval(this.timer);
       document.documentElement.style.setProperty("--cells-in-row", 8);
-      this.resultFaceImage.setAttribute("href", "./assets/sprite.svg#neutral");
-      this.gamePanelEl.style.display = "block";
-      this.gameBoardEl.textContent = "";
-      this.modalEl.classList.add("hide");
-      this.timerEl.textContent = 0;
-      this.mineCounterEl.textContent = 0;
+      this.elements.resultFaceImage.setAttribute(
+         "href",
+         "./assets/sprite.svg#neutral"
+      );
+      this.elements.gamePanel.style.display = "block";
+      this.elements.gameBoard.textContent = "";
+      this.elements.modal.classList.add("hide");
+      this.elements.timer.textContent = 0;
+      this.elements.mineCounter.textContent = 0;
    }
 
    end(isLose) {
@@ -117,7 +119,7 @@ class Game {
       clearInterval(this.timer);
       this.displayModal(isLose);
       if (isLose) {
-         this.resultFaceImage.setAttribute(
+         this.elements.resultFaceImage.setAttribute(
             "href",
             "./assets/sprite.svg#negative"
          );
@@ -127,7 +129,7 @@ class Game {
             mineCell.classList.add("cell--is-mine");
          });
       } else
-         this.resultFaceImage.setAttribute(
+         this.elements.resultFaceImage.setAttribute(
             "href",
             "./assets/sprite.svg#positive"
          );
@@ -135,7 +137,7 @@ class Game {
 
    start() {
       this.initLevelButtons();
-      this.resetButtonEl.addEventListener("click", () => this.reset());
+      this.elements.resetButton.addEventListener("click", () => this.reset());
    }
 }
 export default Game;
