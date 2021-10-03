@@ -30,48 +30,48 @@ class Game {
          modalButton,
       };
       this.timer = null;
-      this.level = {};
-      this.mine = {};
       this.cell = {};
    }
 
-   setAllLevelProperty(e) {
-      const levelName = e.target.id;
-      this.level = levels.filter(({ name }) => name === levelName)[0];
-      const numberOfCells = this.level.rows * this.level.columns;
+   setLvlProperties(levelName) {
+      const level = levels.filter(({ name }) => name === levelName)[0];
+      const numberOfCells = level.rows * level.columns;
+      const mine = new Mine(numberOfCells, level.mines);
+      const { gameBoard, mineCounter, gamePanel } = this.elements;
+
+      mineCounter.textContent = level.mines;
+      gamePanel.style.display = "none";
+
       this.cell = new Cell(
          this.end.bind(this),
          numberOfCells,
-         this.elements.gameBoard,
-         this.level.columns,
-         this.elements.mineCounter
+         gameBoard,
+         level.columns,
+         mineCounter,
+         mine.drawMineIndexes()
       );
-      this.mine = new Mine(this.cell.numberOfCells, this.level.mines);
-      this.elements.mineCounter.textContent = this.level.mines;
-      this.mine.drawMineIndexes();
-      this.cell.mineIndexes = this.mine.mineIndexes;
-      this.cell.createCells();
-      this.cell.pushIndexesNextToMine();
-      this.elements.gamePanel.style.display = "none";
+      this.cell.init();
       this.startTimer();
    }
 
-   initLevelButtons() {
+   initUIButtons() {
       levels.forEach(({ name }) => {
          const button = document.createElement("button");
          button.id = name;
          button.classList.add("button");
          button.innerText = name;
-         button.addEventListener("click", (e) => this.setAllLevelProperty(e));
+         button.addEventListener("click", (e) =>
+            this.setLvlProperties(e.target.id)
+         );
          this.elements.buttonsPanel.appendChild(button);
       });
+      this.elements.resetButton.addEventListener("click", () => this.reset());
    }
 
    displayModal(isLose) {
       const convertTime = (time) => {
          const shouldAddZero = (timeToCheck) =>
             timeToCheck < 10 ? "0" + timeToCheck : String(timeToCheck);
-
          const seconds = shouldAddZero(time % 60);
          const minutes = shouldAddZero(Math.floor(time / 60) % 60);
          const hours = shouldAddZero(Math.floor(time / (60 * 60)));
@@ -123,7 +123,7 @@ class Game {
             "href",
             "./assets/sprite.svg#negative"
          );
-         this.mine.mineIndexes.forEach((mineIndex) => {
+         this.cell.mineIndexes.forEach((mineIndex) => {
             this.cell.showCell(mineIndex);
             const mineCell = document.getElementById(mineIndex);
             mineCell.classList.add("cell--is-mine");
@@ -136,8 +136,7 @@ class Game {
    }
 
    start() {
-      this.initLevelButtons();
-      this.elements.resetButton.addEventListener("click", () => this.reset());
+      this.initUIButtons();
    }
 }
 export default Game;

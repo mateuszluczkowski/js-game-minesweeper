@@ -1,19 +1,19 @@
 class Mine {
    constructor(numberOfCells, numberOfMines) {
-      this.mineIndexes = [];
       this.numberOfCells = numberOfCells;
       this.numberOfMines = numberOfMines;
    }
    drawMineIndexes() {
+      const mineIndexes = [];
       for (let i = 0; i < this.numberOfMines; i++) {
          let drawIndex = Math.floor(Math.random() * this.numberOfCells);
 
-         while (this.mineIndexes.includes(drawIndex))
+         while (mineIndexes.includes(drawIndex))
             drawIndex = Math.floor(Math.random() * this.numberOfCells);
 
-         this.mineIndexes.push(drawIndex);
+         mineIndexes.push(drawIndex);
       }
-      this.mineIndexes.sort((a, b) => a - b);
+      return mineIndexes;
    }
 }
 

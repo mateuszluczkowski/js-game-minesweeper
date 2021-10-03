@@ -4,13 +4,14 @@ class Cell {
       numberOfCells,
       gameBoardEl,
       numberOfColumns,
-      mineCounterEl
+      mineCounterEl,
+      mineIndexes
    ) {
       this.numberOfCells = numberOfCells;
       this.allCells = [];
       this.numberOfColumns = numberOfColumns;
       this.gameBoardEl = gameBoardEl;
-      this.mineIndexes = [];
+      this.mineIndexes = mineIndexes;
       this.numberOfGuessedCells = 0;
       this.indexesCellsNextToMine = [];
       this.flagedIndexes = [];
@@ -18,31 +19,38 @@ class Cell {
       this.numberOfFlagedBomb = 0;
       this.end = end;
    }
+   init() {
+      this.createCells();
+      this.pushIndexesNextToMine();
+   }
 
    disableAllCells() {
       this.allCells.forEach((cell) => (cell.style.pointerEvents = "none"));
    }
 
    showCell(index) {
+      this.numberOfGuessedCells++;
       const cell = this.allCells[index];
       cell.classList.remove("border--concave");
       cell.classList.remove("cell--is-flag");
       cell.classList.add("border--revealed");
-      this.numberOfGuessedCells++;
-      const isWin =
-         this.numberOfGuessedCells ===
-         this.numberOfCells - this.mineIndexes.length;
-      if (isWin) this.end();
    }
 
    handleCellClick(e) {
       const cellIndex = Number(e.target.id);
-      const isLose = this.mineIndexes.includes(cellIndex);
       if (this.flagedIndexes.includes(cellIndex)) return;
+      const isLose = this.mineIndexes.includes(cellIndex);
       if (isLose) return this.end(true);
+
       this.showCell(cellIndex);
+
+      const isWin =
+         this.numberOfGuessedCells ===
+         this.numberOfCells - this.mineIndexes.length;
+      if (isWin) return this.end();
       this.showNumber(cellIndex);
    }
+
    createCells() {
       document.documentElement.style.setProperty(
          "--cells-in-row",
