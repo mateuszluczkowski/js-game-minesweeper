@@ -1,0 +1,23 @@
+{
+   "name": "js-game-minesweeper",
+   "version": "1.0.0",
+   "description": "The all-known old windows game :) Project made with pure JS.",
+   "main": "index.js",
+   "scripts": {
+      "test": "jest"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/mateuszluczkowski/js-game-minesweeper.git"
+   },
+   "author": "",
+   "license": "ISC",
+   "bugs": {
+      "url": "https://github.com/mateuszluczkowski/js-game-minesweeper/issues"
+   },
+   "homepage": "https://github.com/mateuszluczkowski/js-game-minesweeper#readme",
+   "devDependencies": {
+      "@babel/plugin-transform-modules-commonjs": "^7.16.8",
+      "jest": "^27.4.7"
+   }
+}
